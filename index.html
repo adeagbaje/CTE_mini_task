@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced SQL Analysis | CTEs & Window Functions</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --info: #2980b9;
+            --text: #333;
+            --bg: #f9f9f9;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            font-weight: 300;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .project-intro {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card-title {
+            color: var(--secondary);
+            margin-top: 0;
+        }
+        
+        pre {
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+        
+        code {
+            background-color: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 2rem 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .highlight {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid var(--secondary);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .skill-tag {
+            background-color: var(--secondary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        footer {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+        
+        .results-highlight {
+            background-color: rgba(39, 174, 96, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .schema-diagram {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .table-highlight {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            table {
+                font-size: 0.8rem;
+            }
+            
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Advanced SQL Data Analysis</h1>
+            <p class="subtitle"><p>This project demonstrates advanced SQL skills that can transform raw data into strategic insights.</p> CTEs and Window Functions for Business Intelligence</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <section class="project-intro">
+            <h2 class="section-title">Project Overview</h2>
+            <p>This project demonstrates my expertise in advanced SQL techniques by analyzing a comprehensive sales database using Common Table Expressions (CTEs) and Window Functions. The analysis transforms raw operational data into strategic insights that drive business decisions.</p>
+            
+            <div class="highlight">
+                <h3>Key Business Questions Addressed:</h3>
+                <ul>
+                    <li>Customer segmentation based on purchasing behavior</li>
+                    <li>Product performance analysis across multiple dimensions</li>
+                    <li>Sales team performance evaluation</li>
+                    <li>Data quality validation and integrity checks</li>
+                    <li>Time-series analysis of sales trends</li>
+                </ul>
+            </div>
+            
+            <div class="skills">
+                <span class="skill-tag">SQL</span>
+                <span class="skill-tag">Data Analysis</span>
+                <span class="skill-tag">CTEs</span>
+                <span class="skill-tag">Window Functions</span>
+                <span class="skill-tag">Business Intelligence</span>
+                <span class="skill-tag">Data Quality</span>
+            </div>
+        </section>
+        
+        <section>
+            <h2 class="section-title">Database Schema</h2>
+            <p>The analysis was performed on a relational database with the following complete tables:</p>
+            
+            <div class="card">
+                <h3 class="card-title">Orders Table</h3>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>OrderID</th>
+                            <th>ProductID</th>
+                            <th>CustomerID</th>
+                            <th>SalesPersonID</th>
+                            <th>OrderDate</th>
+                            <th>ShipDate</th>
+                            <th>OrderStatus</th>
+                            <th>ShipAddress</th>
+                            <th>BillAddress</th>
+                            <th>Quantity</th>
+                            <th>Sales</th>
+                            <th>CreationTime</th>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>101</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>2025-01-01</td>
+                            <td>2025-01-05</td>
+                            <td>Delivered</td>
+                            <td>9833 Mt. Dias Blv.</td>
+                            <td>1226 Shoe St.</td>
+                            <td>1</td>
+                            <td>10</td>
+                            <td>2025-01-01 12:34:56.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>102</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>2025-01-05</td>
+                            <td>2025-01-10</td>
+                            <td>Shipped</td>
+                            <td>250 Race Court</td>
+                            <td>NULL</td>
+                            <td>1</td>
+                            <td>15</td>
+                            <td>2025-01-05 23:22:04.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>101</td>
+                            <td>1</td>
+                            <td>5</td>
+                            <td>2025-01-10</td>
+                            <td>2025-01-25</td>
+                            <td>Delivered</td>
+                            <td>8157 W. Book</td>
+                            <td>8157 W. Book</td>
+                            <td>2</td>
+                            <td>20</td>
+                            <td>2025-01-10 18:24:08.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>105</td>
+                            <td>1</td>
+                            <td>3</td>
+                            <td>2025-01-20</td>
+                            <td>2025-01-25</td>
+                            <td>Shipped</td>
+                            <td>5724 Victory Lane</td>
+                            <td>NULL</td>
+                            <td>2</td>
+                            <td>60</td>
+                            <td>2025-01-20 05:50:33.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>104</td>
+                            <td>2</td>
+                            <td>5</td>
+                            <td>2025-02-01</td>
+                            <td>2025-02-05</td>
+                            <td>Delivered</td>
+                            <td>NULL</td>
+                            <td>NULL</td>
+                            <td>1</td>
+                            <td>25</td>
+                            <td>2025-02-01 14:02:41.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>104</td>
+                            <td>3</td>
+                            <td>5</td>
+                            <td>2025-02-05</td>
+                            <td>2025-02-10</td>
+                            <td>Delivered</td>
+                            <td>1792 Belmont Rd.</td>
+                            <td>NULL</td>
+                            <td>2</td>
+                            <td>50</td>
+                            <td>2025-02-06 15:34:57.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>102</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2025-02-15</td>
+                            <td>2025-02-27</td>
+                            <td>Delivered</td>
+                            <td>136 Balboa Court</td>
+                            <td>NULL</td>
+                            <td>2</td>
+                            <td>30</td>
+                            <td>2025-02-16 06:22:01.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>101</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>2025-02-18</td>
+                            <td>2025-02-27</td>
+                            <td>Shipped</td>
+                            <td>2947 Vine Lane</td>
+                            <td>4311 Clay Rd</td>
+                            <td>3</td>
+                            <td>90</td>
+                            <td>2025-02-18 10:45:22.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>101</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>2025-03-10</td>
+                            <td>2025-03-15</td>
+                            <td>Shipped</td>
+                            <td>3768 Door Way</td>
+                            <td>NULL</td>
+                            <td>2</td>
+                            <td>20</td>
+                            <td>2025-03-10 12:59:04.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>102</td>
+                            <td>3</td>
+                            <td>5</td>
+                            <td>2025-03-15</td>
+                            <td>2025-03-20</td>
+                            <td>Shipped</td>
+                            <td>NULL</td>
+                            <td>NULL</td>
+                            <td>0</td>
+                            <td>60</td>
+                            <td>2025-03-16 23:25:15.0000000</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">Customers Table</h3>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>CustomerID</th>
+                            <th>FirstName</th>
+                            <th>LastName</th>
+                            <th>Country</th>
+                            <th>Score</th>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Jossef</td>
+                            <td>Goldberg</td>
+                            <td>Germany</td>
+                            <td>350</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Kevin</td>
+                            <td>Brown</td>
+                            <td>USA</td>
+                            <td>900</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Mary</td>
+                            <td>NULL</td>
+                            <td>USA</td>
+                            <td>750</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Mark</td>
+                            <td>Schwarz</td>
+                            <td>Germany</td>
+                            <td>500</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Anna</td>
+                            <td>Adams</td>
+                            <td>USA</td>
+                            <td>NULL</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">Products Table</h3>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>ProductID</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                        </tr>
+                        <tr>
+                            <td>101</td>
+                            <td>Bottle</td>
+                            <td>Accessories</td>
+                            <td>10</td>
+                        </tr>
+                        <tr>
+                            <td>102</td>
+                            <td>Tire</td>
+                            <td>Accessories</td>
+                            <td>15</td>
+                        </tr>
+                        <tr>
+                            <td>103</td>
+                            <td>Socks</td>
+                            <td>Clothing</td>
+                            <td>20</td>
+                        </tr>
+                        <tr>
+                            <td>104</td>
+                            <td>Caps</td>
+                            <td>Clothing</td>
+                            <td>25</td>
+                        </tr>
+                        <tr>
+                            <td>105</td>
+                            <td>Gloves</td>
+                            <td>Clothing</td>
+                            <td>30</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">Employees Table</h3>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>EmployeeID</th>
+                            <th>FirstName</th>
+                            <th>LastName</th>
+                            <th>Department</th>
+                            <th>BirthDate</th>
+                            <th>Gender</th>
+                            <th>Salary</th>
+                            <th>ManagerID</th>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Frank</td>
+                            <td>Lee</td>
+                            <td>Marketing</td>
+                            <td>1988-12-05</td>
+                            <td>M</td>
+                            <td>55000</td>
+                            <td>NULL</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Kevin</td>
+                            <td>Brown</td>
+                            <td>Marketing</td>
+                            <td>1972-11-25</td>
+                            <td>M</td>
+                            <td>65000</td>
+                            <td>1</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Mary</td>
+                            <td>NULL</td>
+                            <td>Sales</td>
+                            <td>1986-01-05</td>
+                            <td>F</td>
+                            <td>75000</td>
+                            <td>1</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Michael</td>
+                            <td>Ray</td>
+                            <td>Sales</td>
+                            <td>1977-02-10</td>
+                            <td>M</td>
+                            <td>90000</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Carol</td>
+                            <td>Baker</td>
+                            <td>Sales</td>
+                            <td>1982-02-11</td>
+                            <td>F</td>
+                            <td>55000</td>
+                            <td>3</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">OrdersArchive Table</h3>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>OrderID</th>
+                            <th>ProductID</th>
+                            <th>CustomerID</th>
+                            <th>SalesPersonID</th>
+                            <th>OrderDate</th>
+                            <th>ShipDate</th>
+                            <th>OrderStatus</th>
+                            <th>ShipAddress</th>
+                            <th>BillAddress</th>
+                            <th>Quantity</th>
+                            <th>Sales</th>
+                            <th>CreationTime</th>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>101</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>2024-04-01</td>
+                            <td>2024-04-05</td>
+                            <td>Shipped</td>
+                            <td>123 Main St</td>
+                            <td>456 Billing St</td>
+                            <td>1</td>
+                            <td>10</td>
+                            <td>2024-04-01 12:34:56.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>102</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>2024-04-05</td>
+                            <td>2024-04-10</td>
+                            <td>Shipped</td>
+                            <td>456 Elm St</td>
+                            <td>789 Billing St</td>
+                            <td>1</td>
+                            <td>15</td>
+                            <td>2024-04-05 23:22:04.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>101</td>
+                            <td>1</td>
+                            <td>4</td>
+                            <td>2024-04-10</td>
+                            <td>2024-04-25</td>
+                            <td>Shipped</td>
+                            <td>789 Maple St</td>
+                            <td>789 Maple St</td>
+                            <td>2</td>
+                            <td>20</td>
+                            <td>2024-04-10 18:24:08.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>105</td>
+                            <td>1</td>
+                            <td>3</td>
+                            <td>2024-04-20</td>
+                            <td>2024-04-25</td>
+                            <td>Shipped</td>
+                            <td>987 Victory Lane</td>
+                            <td>NULL</td>
+                            <td>2</td>
+                            <td>60</td>
+                            <td>2024-04-20 05:50:33.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>105</td>
+                            <td>1</td>
+                            <td>3</td>
+                            <td>2024-04-20</td>
+                            <td>2024-04-25</td>
+                            <td>Delivered</td>
+                            <td>987 Victory Lane</td>
+                            <td>NULL</td>
+                            <td>2</td>
+                            <td>60</td>
+                            <td>2024-04-20 14:50:33.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>104</td>
+                            <td>2</td>
+                            <td>5</td>
+                            <td>2024-05-01</td>
+                            <td>2024-05-05</td>
+                            <td>Shipped</td>
+                            <td>345 Oak St</td>
+                            <td>678 Pine St</td>
+                            <td>1</td>
+                            <td>25</td>
+                            <td>2024-05-01 14:02:41.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>104</td>
+                            <td>3</td>
+                            <td>5</td>
+                            <td>2024-05-05</td>
+                            <td>2024-05-10</td>
+                            <td>Delivered</td>
+                            <td>543 Belmont Rd.</td>
+                            <td>NULL</td>
+                            <td>2</td>
+                            <td>50</td>
+                            <td>2024-05-06 15:34:57.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>104</td>
+                            <td>3</td>
+                            <td>5</td>
+                            <td>2024-05-05</td>
+                            <td>2024-05-10</td>
+                            <td>Delivered</td>
+                            <td>543 Belmont Rd.</td>
+                            <td>3768 Door Way</td>
+                            <td>2</td>
+                            <td>50</td>
+                            <td>2024-05-07 13:22:05.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>101</td>
+                            <td>3</td>
+                            <td>5</td>
+                            <td>2024-05-05</td>
+                            <td>2024-05-10</td>
+                            <td>Delivered</td>
+                            <td>543 Belmont Rd.</td>
+                            <td>3768 Door Way</td>
+                            <td>2</td>
+                            <td>50</td>
+                            <td>2024-05-12 20:36:55.0000000</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>102</td>
+                            <td>3</td>
+                            <td>5</td>
+                            <td>2024-06-15</td>
+                            <td>2024-06-20</td>
+                            <td>Shipped</td>
+                            <td>111 Main St</td>
+                            <td>222 Billing St</td>
+                            <td>0</td>
+                            <td>60</td>
+                            <td>2024-06-16 23:25:15.0000000</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2 class="section-title">CTE Implementation</h2>
+            <p>Common Table Expressions (CTEs) were used to create modular, readable queries that build upon each other to answer complex business questions.</p>
+            
+            <div class="card">
+                <h3 class="card-title">Customer Sales Analysis</h3>
+                <p>This query calculates total sales per customer, identifies their last order date, ranks them by sales performance, and segments them into categories for targeted marketing.</p>
+                
+                <pre><code>/*
+=======================================================================
+                 CTE (NON RECURSIVE) MINI PROJECT 
+=======================================================================
+*/
+
+--CTE (Standalone)
+--Find the total sales per customer
+
+WITH TotalSalesPerCustomer AS
+(SELECT 
+    CustomerID,
+    SUM(Sales) TotalSales
+FROM [Sales].[Orders]
+GROUP BY CustomerID
+),
+
+--CTE (Multiple Standalone) USE a comma to separate each standalone CTE and do not repeat the with
+--Find the last order date for each customers
+
+LastOrderDate AS
+(SELECT 
+    CustomerID,
+    MAX(OrderDate) LastOrderDate
+FROM [Sales].[Orders]
+GROUP BY CustomerID
+
+--Note, you can use any sql statement within the CTE except the ORDER BY
+),
+
+--CTE (Nested) 
+--Rank the customers based on Total Sales per customer
+
+CustomerRanking AS
+(SELECT 
+    CustomerID,
+    TotalSales,
+    RANK() OVER(ORDER BY TotalSales DESC) CustomerRank
+FROM TotalSalesPerCustomer
+),
+
+--Segment the customers based on Total Sales (CTE (Nested) )
+CustomerSegmentation AS
+(SELECT 
+    CustomerID,
+    CASE WHEN TotalSales > 110 THEN 'HighSales'
+         WHEN TotalSales BETWEEN 90 AND 110 THEN 'MediumSales'
+         ELSE 'LowSales' END Segment
+FROM TotalSalesPerCustomer
+)
+
+
+SELECT 
+    C.CustomerID,
+    C.FirstName,
+    C.LastName,
+    T.TotalSales,
+    L.LastOrderDate,
+    CR.CustomerRank,
+    CS.Segment
+FROM [Sales].[Customers] C
+LEFT JOIN TotalSalesPerCustomer T ON T.CustomerID = C.CustomerID
+LEFT JOIN LastOrderDate L ON L.CustomerID = C.CustomerID
+LEFT JOIN CustomerRanking CR ON CR.CustomerID = C.CustomerID
+LEFT JOIN CustomerSegmentation CS ON CS.CustomerID = C.CustomerID
+ORDER BY TotalSales DESC;</code></pre>
+                
+                <div class="results-highlight">
+                    <h4>Business Impact:</h4>
+                    <p>This analysis enables the marketing team to:</p>
+                    <ul>
+                        <li>Identify top customers for loyalty programs</li>
+                        <li>Target reactivation campaigns to customers who haven't ordered recently</li>
+                        <li>Allocate resources effectively based on customer value segments</li>
+                        <li>Personalize marketing messages based on customer value tier</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2 class="section-title">Window Functions Implementation</h2>
+            <p>Window functions were used to perform complex calculations across sets of rows while retaining detailed data.</p>
+            
+            <div class="card">
+                <h3 class="card-title">Sales Performance Analysis</h3>
+                <p>This comprehensive query provides multiple perspectives on sales performance including product totals, rankings, and comparisons to averages.</p>
+                
+                <pre><code>/*
+========================================
+          WINDOW FUNCTIONS
+========================================
+*/
+USE SalesDB;
+GO
+
+SELECT 
+    OrderID,
+    ProductID,
+    OrderDate,
+    OrderStatus,
+    Sales,
+    SUM(Sales) OVER(PARTITION BY ProductID) ProductTotal,
+    SUM(Sales) OVER(PARTITION BY ProductID, OrderStatus) ProductTotalbyStatus,
+    SUM(Sales) OVER() TotalSales,
+    ROUND(CAST(Sales AS FLOAT)/SUM(Sales) OVER() * 100, 2) PercentageOfTotal,
+    AVG(Sales) OVER() AverageSales,
+    AVG(Sales) OVER(PARTITION BY ProductID) AverageSalesbyProduct,
+    MAX(Sales) OVER() HighestSales,
+    MIN(Sales) OVER() LowestSales
+FROM [Sales].[Orders]</code></pre>
+                
+                <div class="results-highlight">
+                    <h4>Business Impact:</h4>
+                    <p>This comprehensive view helps business leaders:</p>
+                    <ul>
+                        <li>Understand which products contribute most to revenue</li>
+                        <li>Identify performance differences by order status</li>
+                        <li>Benchmark individual orders against averages</li>
+                        <li>Spot outliers in the sales distribution</li>
+                        <li>Make data-driven inventory decisions</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">Data Quality Check</h3>
+                <p>Window functions can also be used to identify potential data quality issues, as shown in this duplicate detection query:</p>
+                
+                <pre><code>--Check whether the table 'OrdersArchive' contains any duplicates
+--Checking data quality
+
+SELECT *
+FROM (
+    SELECT 
+        OrderID,
+        COUNT(OrderID) OVER(PARTITION BY OrderID) IDCheck
+    FROM [Sales].[OrdersArchive]
+) T
+WHERE IDCheck != 1</code></pre>
+                
+                <div class="results-highlight">
+                    <h4>Business Impact:</h4>
+                    <p>Maintaining data integrity is crucial for accurate reporting. This query helps:</p>
+                    <ul>
+                        <li>Identify potential duplicate orders</li>
+                        <li>Ensure the reliability of analytics</li>
+                        <li>Maintain trust in business metrics</li>
+                        <li>Improve data governance processes</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">Advanced Analytics Examples</h3>
+                <p>Additional window function implementations demonstrating advanced analytical capabilities:</p>
+                
+                <pre><code>--Rank each of the orders based on their sales from highest to lowest
+SELECT 
+    OrderID,
+    OrderDate,
+    Sales,
+    RANK() OVER(ORDER BY Sales DESC) SalesRank
+FROM [Sales].[Orders]
+
+--Calculate the moving average of sales for each product over time
+SELECT 
+    OrderID,
+    ProductID,
+    OrderDate,
+    Sales,
+    AVG(Sales) OVER(PARTITION BY ProductID) AverageSales,
+    AVG(Sales) OVER(PARTITION BY ProductID ORDER BY OrderDate) MovingAverage
+FROM [Sales].[Orders]
+
+--Find the deviation of each sales from the minimum and maximum sales amount
+SELECT 
+    OrderID,
+    Sales,
+    MAX(Sales) OVER() HighestSales,
+    MIN(Sales) OVER() LowestSales,
+    ABS(Sales - MAX(Sales) OVER()) SalesDeviationFromMax,
+    (Sales - MIN(Sales) OVER()) SalesDeviationFromMin
+FROM [Sales].[Orders]</code></pre>
+                
+                <div class="results-highlight">
+                    <h4>Business Impact:</h4>
+                    <p>These advanced techniques enable:</p>
+                    <ul>
+                        <li>Trend analysis and forecasting</li>
+                        <li>Performance benchmarking</li>
+                        <li>Anomaly detection</li>
+                        <li>Seasonality analysis</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2 class="section-title">Key Takeaways</h2>
+            <div class="card">
+                <h3 class="card-title">Technical Achievements</h3>
+                <ul>
+                    <li>Demonstrated mastery of advanced SQL features including CTEs and Window Functions</li>
+                    <li>Created modular, maintainable queries that can be easily adapted as business needs change</li>
+                    <li>Implemented comprehensive data quality checks</li>
+                    <li>Delivered actionable business intelligence from raw data</li>
+                    <li>Showcased ability to handle complex analytical requirements</li>
+                </ul>
+                
+                <h3 class="card-title">Business Value Delivered</h3>
+                <ul>
+                    <li>Enabled data-driven customer segmentation for targeted marketing</li>
+                    <li>Provided visibility into product performance across multiple dimensions</li>
+                    <li>Established benchmarks for evaluating sales performance</li>
+                    <li>Identified potential data integrity issues before they impact decision-making</li>
+                    <li>Created foundation for predictive analytics and forecasting</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>© 2025 Data Analysis Mini Project | Adekunle I. Agbaje</p>
+        </div>
+    </footer>
+</body>
+</html>
